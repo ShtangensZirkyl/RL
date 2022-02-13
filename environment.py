@@ -40,11 +40,15 @@ class Environment(object):
 
     def build_environment(self):
         rate = random.uniform(0.3, 0.5)
-        dist = random.uniform(7, 15)
+        dist = random.uniform(9, 17)
         angle = random.uniform(0, 2 * math.pi)
-        self.flag = Island(0, 0, 1)
-        self.ship = Ship(dist * math.cos(angle), dist * math.sin(angle))
-        self.island = Island(rate * dist * math.cos(angle), rate * dist * math.sin(angle))
+        x_flag = random.uniform(-5, 5)
+        y_flag = random.uniform(-5, 5)
+        self.flag = Island(x_flag, y_flag, 1)
+        self.ship = Ship(x_flag + dist * math.cos(angle), y_flag + dist * math.sin(angle))
+        self.island = Island(x_flag + rate * dist * math.cos(angle),
+                             y_flag + rate * dist * math.sin(angle),
+                             random.uniform(1, 3))
         a = self.ship.getCoords()
         c = self.flag.getCoords()
         dxf, dyf = c[0] - a[0], c[1] - a[1]
@@ -59,11 +63,14 @@ class Environment(object):
 
     def step(self, action):
         dt = 1
+        angle_change_reward = 0
 
         if action == 0:
             self.ship.direction += math.pi / 6
+            angle_change_reward = 10
         elif action == 1:
             self.ship.direction -= math.pi / 6
+            angle_change_reward = 10
 
         self.ship.move(dt)
 
@@ -84,9 +91,8 @@ class Environment(object):
             reward = -1000 * (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 2
         else:
             reward = (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 3
-            reward -= 0.1 * (self.prev_i_dist - self.island.get_dist(self.ship.x, self.ship.y)) ** 3
-            if reward < 0:
-                reward *= 10
+            # reward -= 0.1 * (self.prev_i_dist - self.island.get_dist(self.ship.x, self.ship.y)) ** 3
+            reward -= angle_change_reward
             done = False
 
         self.prev_dist = self.flag.get_dist(self.ship.x, self.ship.y)
@@ -102,10 +108,11 @@ class Environment(object):
         ax.add_artist(self.island.draw_island('green'))
         ax.add_artist(self.flag.draw_island())
         pos = self.ship.get_positions()
-        for i in range(len(pos) - 1):
-            ax.plot([pos[i][0], pos[i + 1][0]], [pos[i][1], pos[i + 1][1]], marker='o', color='r')
+        for i in range(len(pos)):
+            ax.plot(pos[i][0], pos[i][1], '.r')
         plt.show()
 
 
 if __name__ == '__main__':
     env = Environment()
+    env.draw_map()
