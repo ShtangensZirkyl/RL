@@ -14,8 +14,6 @@ class Ship:
     def move(self, dt=1):
         self.x += dt * self.v * math.cos(self.direction)
         self.y += dt * self.v * math.sin(self.direction)
-        self.cum_d += abs(self.direction - self.prev_d)
-        self.prev_d = self.direction
 
     def getCoords(self):
         return [self.x, self.y]

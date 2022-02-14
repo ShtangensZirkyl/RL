@@ -3,12 +3,14 @@ import matplotlib.pyplot as plt
 import random
 from island import Island
 from ship import Ship
+from obstacle import Obstacle
 
 
 X_LOWER_BOUND = 0
 X_UPPER_BOUND = 10
 Y_LOWER_BOUND = 0
 Y_UPPER_BOUND = 10
+STEPS_LIMIT = 25
 
 
 class Environment(object):
@@ -25,7 +27,7 @@ class Environment(object):
         self.ship = Ship()
         self.island = Island()
 
-        self.build_environment()
+        self.build_environment(0, 0)
 
     def get_state(self):
         a = self.ship.getCoords()
@@ -38,17 +40,18 @@ class Environment(object):
         return [f_angle - self.ship.direction, (dxf ** 2 + dyf ** 2) ** 0.5,
                 i_angle - self.ship.direction, (dxi ** 2 + dyi ** 2) ** 0.5]
 
-    def build_environment(self):
+    def build_environment(self, angle1, angle2):
         rate = random.uniform(0.3, 0.5)
         dist = random.uniform(9, 17)
-        angle = random.uniform(0, 2 * math.pi)
+        # angle = random.uniform(0, 2 * math.pi)
+        # angle2 = random.uniform(0, 2 * math.pi)
         x_flag = random.uniform(-5, 5)
         y_flag = random.uniform(-5, 5)
         self.flag = Island(x_flag, y_flag, 1)
-        self.ship = Ship(x_flag + dist * math.cos(angle), y_flag + dist * math.sin(angle))
-        self.island = Island(x_flag + rate * dist * math.cos(angle),
-                             y_flag + rate * dist * math.sin(angle),
-                             random.uniform(1, 3))
+        self.ship = Ship(x_flag + dist * math.cos(angle1), y_flag + dist * math.sin(angle1))
+        self.island = Island(x_flag + rate * dist * math.cos(angle2),
+                             y_flag + rate * dist * math.sin(angle2),
+                             random.uniform(0.5, 3))
         a = self.ship.getCoords()
         c = self.flag.getCoords()
         dxf, dyf = c[0] - a[0], c[1] - a[1]
@@ -57,8 +60,8 @@ class Environment(object):
         self.prev_dist = self.flag.get_dist(self.ship.x, self.ship.y)
         self.prev_i_dist = self.island.get_dist(self.ship.x, self.ship.y)
 
-    def reset(self):
-        self.build_environment()
+    def reset(self, angle1, angle2):
+        self.build_environment(angle1, angle2)
         return self.get_state()
 
     def step(self, action):
@@ -66,10 +69,10 @@ class Environment(object):
         angle_change_reward = 0
 
         if action == 0:
-            self.ship.direction += math.pi / 6
+            self.ship.direction += math.pi / 12
             angle_change_reward = 10
         elif action == 1:
-            self.ship.direction -= math.pi / 6
+            self.ship.direction -= math.pi / 12
             angle_change_reward = 10
 
         self.ship.move(dt)
@@ -80,13 +83,14 @@ class Environment(object):
 
         if self.flag.belongs_to_boarder(self.ship.x, self.ship.y):
             reward = 20000
+            reward += (STEPS_LIMIT - len(self.ship.get_positions())) * 100
             done = True
 
         elif self.island.belongs_to_boarder(self.ship.x, self.ship.y):
             reward = -10000
             done = True
 
-        elif len(self.ship.get_positions()) > 20:
+        elif len(self.ship.get_positions()) > STEPS_LIMIT:
             done = True
             reward = -1000 * (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 2
         else:
@@ -111,6 +115,7 @@ class Environment(object):
         for i in range(len(pos)):
             ax.plot(pos[i][0], pos[i][1], '.r')
         plt.show()
+        return field
 
 
 if __name__ == '__main__':
