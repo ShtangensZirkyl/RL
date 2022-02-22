@@ -108,7 +108,7 @@ class Environment(object):
 
     def draw_map(self):
         field, ax = plt.subplots()
-        ax.set(xlim=(X_UPPER_BOUND * -2, X_UPPER_BOUND * 2),
+        ax.set(xlim=(X_UPPER_BOUND* -2, X_UPPER_BOUND * 2),
                ylim=(Y_UPPER_BOUND * -2, Y_UPPER_BOUND * 2))
         ax.set_aspect(1)
         ax.add_artist(self.target.draw('green'))
