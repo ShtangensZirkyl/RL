@@ -30,18 +30,16 @@ class Environment(object):
 
         self.build_environment()
 
-    def build_environment(self):
-        rate = random.uniform(0.4, 0.6)
-        dist = random.uniform(5, 15)
-        angle = random.uniform(0, 2 * math.pi)
-        target_angle = random.uniform(0, 2 * math.pi)
-        target_vel = random.uniform(-3, 3)
-        x_flag = random.uniform(-5, 5)
-        y_flag = random.uniform(-5, 5)
+    def build_environment(self, target_dist=0, target_dir=0, peel=0, target_vel=0, ship_vel=0):
+        # rate = random.uniform(0.4, 0.6)
+        # dist = random.uniform(5, 15)
+        # angle = random.uniform(0, 2 * math.pi)
+        x_flag = 12
+        y_flag = 10
         self.flag = Island(x_flag, y_flag, 1)
-        self.ship = Ship(x_flag + dist * math.cos(angle), y_flag + dist * math.sin(angle))
-        self.target = Target(x_flag + dist * rate * math.cos(angle), y_flag + dist * rate * math.sin(angle), 1,
-                             target_angle, target_vel)
+        self.ship = Ship(0, 0, ship_vel)
+        self.target = Target(target_dist * math.cos(peel), target_dist * math.sin(peel), 1,
+                             target_dir, target_vel)
         a = self.ship.getCoords()
         b = self.flag.getCoords()
         dxf, dyf = b[0] - a[0], b[1] - a[1]
@@ -61,8 +59,8 @@ class Environment(object):
         return [f_angle - self.ship.direction, self.target.get_dist(a[0], a[1]), i_angle - self.ship.direction,
                 self.flag.get_dist(a[0], a[1])]
 
-    def reset(self):
-        self.build_environment()
+    def reset(self, dist, target_dir, peel, target_vel, ship_vel):
+        self.build_environment(dist, target_dir, peel, target_vel, ship_vel)
         return self.get_state()
 
     def step(self, action):
