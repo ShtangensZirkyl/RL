@@ -4,7 +4,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
-
 BATCH_SIZE = 100
 LR = 0.02
 GAMMA = 0.90
@@ -32,8 +31,8 @@ class Net(nn.Module):
 
 
 class DQN:
-    def __init__(self):
-        self.eval_net, self.target_net = Net(), Net()
+    def __init__(self, network):
+        self.eval_net, self.target_net = network(), network()
         self.memory = np.zeros((MEMORY_CAPACITY, NUM_STATES * 2 + 2))
         self.memory_counter = 0
         self.learn_counter = 0
@@ -64,8 +63,8 @@ class DQN:
         sample_index = np.random.choice(MEMORY_CAPACITY, BATCH_SIZE)
         batch_memory = self.memory[sample_index, :]
         batch_state = torch.FloatTensor(batch_memory[:, :NUM_STATES])
-        batch_action = torch.LongTensor(batch_memory[:, NUM_STATES:NUM_STATES+1].astype(int))
-        batch_reward = torch.FloatTensor(batch_memory[:, NUM_STATES+1: NUM_STATES+2])
+        batch_action = torch.LongTensor(batch_memory[:, NUM_STATES:NUM_STATES + 1].astype(int))
+        batch_reward = torch.FloatTensor(batch_memory[:, NUM_STATES + 1: NUM_STATES + 2])
         batch_next_state = torch.FloatTensor(batch_memory[:, -NUM_STATES:])
 
         q_eval = self.eval_net(batch_state).gather(1, batch_action)

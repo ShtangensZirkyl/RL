@@ -1,27 +1,55 @@
 import os
 from environment import Environment
-from network import DQN
+from network import DQN, Net
 import tqdm
 from PIL import Image
 
-
 rewards = []
-net = DQN()
 EPISODES = 50000
-env = Environment()
 MEMORY_CAPACITY = 10000
 
 
-def save_fig(episode, step_counter, environment):
-    if not os.path.isdir('frames'):
-        os.mkdir('frames')
-    os.chdir('frames')
-    if not os.path.isdir('episode' + str(episode)):
-        os.mkdir('episode' + str(episode))
-    os.chdir('episode' + str(episode))
-    fig = environment.draw_map()
-    fig.savefig(str(step_counter) + '.png')
-    os.chdir('../..')
+class DeepRL(object):
+    def __init__(self, network, mem, episodes):
+        self.net = DQN(network)
+        self.env = Environment()
+        self.episodes = episodes
+        self.memory_capacity = mem
+        self.rewards = []
+
+    def train(self):
+        print("The DQN is collecting experience...")
+        step_counter_list = []
+        for episode in tqdm.tqdm(range(self.episodes)):
+            state = env.reset()
+            step_counter = 0
+            while True:
+                if episode % 1000 == 0:
+                    self.save_fig(episode, step_counter)
+                step_counter += 1
+                action = self.net.choose_action(state)
+                next_state, reward, done = env.step(action)
+
+                self.net.store_trans(state, action, reward, next_state)
+                if self.net.memory_counter >= self.memory_capacity:
+                    self.net.learn()
+                if done:
+                    step_counter_list.append(step_counter)
+                    self.rewards.append(reward)
+                    break
+
+                state = next_state
+
+    def save_fig(self, episode, step_counter):
+        if not os.path.isdir('frames'):
+            os.mkdir('frames')
+        os.chdir('frames')
+        if not os.path.isdir('episode' + str(episode)):
+            os.mkdir('episode' + str(episode))
+        os.chdir('episode' + str(episode))
+        fig = self.env.draw_map()
+        fig.savefig(str(step_counter) + '.png')
+        os.chdir('../..')
 
 
 def make_gif_animation(_path):
@@ -46,32 +74,6 @@ def make_gif_animation(_path):
     os.chdir('..')
 
 
-def main():
-    print("The DQN is collecting experience...")
-    step_counter_list = []
-    for episode in tqdm.tqdm(range(EPISODES)):
-        state = env.reset()
-        step_counter = 0
-        while True:
-            if episode % 1000 == 0:
-                save_fig(episode, step_counter, env)
-            step_counter += 1
-            action = net.choose_action(state)
-            next_state, reward, done = env.step(action)
-
-            net.store_trans(state, action, reward, next_state)
-            if net.memory_counter >= MEMORY_CAPACITY:
-                net.learn()
-            if done:
-                step_counter_list.append(step_counter)
-                rewards.append(reward)
-                break
-
-            state = next_state
-
-
 if __name__ == '__main__':
     main()
     make_gif_animation('frames')
-
-
