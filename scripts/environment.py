@@ -4,8 +4,8 @@ import random
 from island import Island
 from ship import Ship
 from target import Target
+import pandas as pd
 import os
-
 
 X_LOWER_BOUND = 0
 X_UPPER_BOUND = 10
@@ -14,9 +14,8 @@ Y_UPPER_BOUND = 10
 STEPS_LIMIT = 25
 
 
-class Environment(object):
-    def __init__(self):
-        super(Environment, self).__init__()
+class Environment:
+    def __init__(self, path='../data/tests.csv'):
         self.action_space = ['left', 'right', 'idle']
         self.n_actions = len(self.action_space)
         self.n_features = 4
@@ -27,19 +26,29 @@ class Environment(object):
         self.flag = None
         self.ship = None
         self.target = None
+        self.dt = 0.1
+        self.steps_limit = 100
+
+        self.index = -1
+        self.data = pd.read_csv(path)
+        self.data = self.data.drop(['Unnamed: 0'], axis=1)
 
         self.build_environment()
 
-    def build_environment(self, target_dist=0, target_dir=0, peel=0, target_vel=0, ship_vel=0):
+    def build_environment(self):
+        self.index += 1
         # rate = random.uniform(0.4, 0.6)
         # dist = random.uniform(5, 15)
         # angle = random.uniform(0, 2 * math.pi)
-        x_flag = 12
-        y_flag = 10
+        self.ship = Ship(0, 0, self.data['speed'].values[self.index])
+        x_flag = 0
+        y_flag = self.ship.v
         self.flag = Island(x_flag, y_flag, 1)
-        self.ship = Ship(0, 0, ship_vel)
-        self.target = Target(target_dist * math.cos(peel), target_dist * math.sin(peel), 1,
-                             target_dir, target_vel)
+        self.steps_limit = 1.4 / self.dt
+        self.target = Target(self.data['dist1'].values[self.index] * math.cos(math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
+                             self.data['dist1'].values[self.index] * math.sin(math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
+                             1, math.pi / 2 - math.radians(self.data['course1'].values[self.index]),
+                             self.data['speed1'].values[self.index])
         a = self.ship.getCoords()
         b = self.flag.getCoords()
         dxf, dyf = b[0] - a[0], b[1] - a[1]
@@ -59,12 +68,11 @@ class Environment(object):
         return [f_angle - self.ship.direction, self.target.get_dist(a[0], a[1]), i_angle - self.ship.direction,
                 self.flag.get_dist(a[0], a[1])]
 
-    def reset(self, dist, target_dir, peel, target_vel, ship_vel):
-        self.build_environment(dist, target_dir, peel, target_vel, ship_vel)
+    def reset(self):
+        self.build_environment()
         return self.get_state()
 
     def step(self, action):
-        dt = 1
         angle_change_reward = 0
 
         if action == 0:
@@ -74,8 +82,8 @@ class Environment(object):
             self.ship.direction -= math.pi / 12
             angle_change_reward = 10
 
-        self.ship.move(dt)
-        self.target.move(dt)
+        self.ship.move(self.dt)
+        self.target.move(self.dt)
 
         self.ship.add_position()
 
@@ -83,14 +91,14 @@ class Environment(object):
 
         if self.flag.belongs_to_boarder(self.ship.x, self.ship.y):
             reward = 20000
-            reward += (STEPS_LIMIT - len(self.ship.get_positions())) * 100
+            reward += (self.steps_limit - len(self.ship.get_positions())) * 100
             done = True
 
         elif self.target.belongs_to_boarder(self.ship.x, self.ship.y):
             reward = -10000
             done = True
 
-        elif len(self.ship.get_positions()) > STEPS_LIMIT:
+        elif len(self.ship.get_positions()) > self.steps_limit:
             done = True
             reward = -1000 * (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 2
         else:
@@ -106,7 +114,7 @@ class Environment(object):
 
     def draw_map(self):
         field, ax = plt.subplots()
-        ax.set(xlim=(X_UPPER_BOUND* -2, X_UPPER_BOUND * 2),
+        ax.set(xlim=(X_UPPER_BOUND * -2, X_UPPER_BOUND * 2),
                ylim=(Y_UPPER_BOUND * -2, Y_UPPER_BOUND * 2))
         ax.set_aspect(1)
         ax.add_artist(self.target.draw('green'))

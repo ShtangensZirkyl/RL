@@ -3,6 +3,7 @@ from environment import Environment
 from network import DQN, Net
 import tqdm
 from PIL import Image
+import matplotlib.pyplot as plt
 
 rewards = []
 EPISODES = 50000
@@ -10,10 +11,10 @@ MEMORY_CAPACITY = 10000
 
 
 class DeepRL(object):
-    def __init__(self, network, mem, episodes):
+    def __init__(self, network=Net, mem=MEMORY_CAPACITY):
         self.net = DQN(network)
         self.env = Environment()
-        self.episodes = episodes
+        self.episodes = len(self.env.data)
         self.memory_capacity = mem
         self.rewards = []
 
@@ -21,14 +22,14 @@ class DeepRL(object):
         print("The DQN is collecting experience...")
         step_counter_list = []
         for episode in tqdm.tqdm(range(self.episodes)):
-            state = env.reset()
+            state = self.env.reset()
             step_counter = 0
             while True:
                 if episode % 1000 == 0:
                     self.save_fig(episode, step_counter)
                 step_counter += 1
                 action = self.net.choose_action(state)
-                next_state, reward, done = env.step(action)
+                next_state, reward, done = self.env.step(action)
 
                 self.net.store_trans(state, action, reward, next_state)
                 if self.net.memory_counter >= self.memory_capacity:
@@ -75,5 +76,17 @@ def make_gif_animation(_path):
 
 
 if __name__ == '__main__':
-    main()
+    drl = DeepRL()
+    drl.train()
+    fig, ax = plt.subplots(nrows=1, ncols=1)
+    ax.plot(drl.rewards)
+    fig.savefig('rewards.png')  # save the figure to file
+    m = 0
+    p = 0
+    for i in drl.rewards:
+        if i < 0:
+            m += 1
+        else:
+            p += 1
+    print(m / (m + p))
     make_gif_animation('frames')
