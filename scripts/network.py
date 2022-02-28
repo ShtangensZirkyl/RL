@@ -30,6 +30,29 @@ class Net(nn.Module):
         return x
 
 
+class Net4(nn.Module):
+    def __init__(self):
+        super(Net4, self).__init__()
+        self.fc1 = nn.Linear(NUM_STATES, 80)
+        self.fc1.weight.data.normal_(0, 0.1)
+        self.fc2 = nn.Linear(80, 160)
+        self.fc2.weight.data.normal_(0, 0.1)
+        self.fc3 = nn.Linear(160, 80)
+        self.fc3.weight.data.normal_(0, 0.1)
+        self.fc4 = nn.Linear(80, NUM_ACTIONS)
+        self.fc4.weight.data.normal_(0, 0.1)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
+        x = F.relu(x)
+        x = self.fc3(x)
+        x = F.relu(x)
+        x = self.fc4(x)
+        return x
+
+
 class DQN:
     def __init__(self, network):
         self.eval_net, self.target_net = network(), network()

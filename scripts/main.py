@@ -1,6 +1,6 @@
 import os
 from environment import Environment
-from network import DQN, Net
+from network import DQN, Net, Net4
 import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -76,7 +76,7 @@ def make_gif_animation(_path):
 
 
 if __name__ == '__main__':
-    drl = DeepRL()
+    drl = DeepRL(network=Net4)
     drl.train()
     fig, ax = plt.subplots(nrows=1, ncols=1)
     ax.plot(drl.rewards)

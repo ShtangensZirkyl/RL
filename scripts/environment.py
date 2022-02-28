@@ -40,6 +40,8 @@ class Environment:
         # rate = random.uniform(0.4, 0.6)
         # dist = random.uniform(5, 15)
         # angle = random.uniform(0, 2 * math.pi)
+        if self.index == len(self.data):
+            self.index = 0
         self.ship = Ship(0, 0, self.data['speed'].values[self.index])
         x_flag = 0
         y_flag = self.ship.v
