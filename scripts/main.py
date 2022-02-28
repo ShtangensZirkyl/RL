@@ -90,3 +90,4 @@ if __name__ == '__main__':
             p += 1
     print(m / (m + p))
     make_gif_animation('frames')
+    drl.save('../models/net4.json')

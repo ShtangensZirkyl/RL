@@ -51,6 +51,9 @@ class Net4(nn.Module):
         x = F.relu(x)
         x = self.fc4(x)
         return x
+    
+    def save(self, path):
+        torch.save(self.state_dict(), path)
 
 
 class DQN:
@@ -67,6 +70,9 @@ class DQN:
         trans = np.hstack((state, action, reward, next_state))
         self.memory[index, :] = trans
         self.memory_counter += 1
+        
+    def save(self, path):
+        self.eval_net.save(path)
 
     def choose_action(self, state):
         state = torch.unsqueeze(torch.FloatTensor(state), 0)
