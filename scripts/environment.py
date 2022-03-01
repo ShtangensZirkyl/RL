@@ -103,6 +103,7 @@ class Environment:
         elif len(self.ship.get_positions()) > self.steps_limit:
             done = True
             reward = -1000 * (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 2
+            reward -= 5000
         else:
             reward = (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 3
             # reward -= 0.1 * (self.prev_i_dist - self.island.get_dist(self.ship.x, self.ship.y)) ** 3
