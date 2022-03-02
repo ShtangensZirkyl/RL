@@ -52,6 +52,9 @@ class DeepRL(object):
         fig.savefig(str(step_counter) + '.png')
         os.chdir('../..')
 
+    def save(self, path):
+        self.net.save(path)
+
 
 def make_gif_animation(_path):
     os.chdir(_path)
@@ -76,7 +79,8 @@ def make_gif_animation(_path):
 
 
 if __name__ == '__main__':
-    drl = DeepRL(network=Net4)
+    # Для Net4: 0.8986447222222222 решенных
+    drl = DeepRL(network=Net)
     drl.train()
     fig, ax = plt.subplots(nrows=1, ncols=1)
     ax.plot(drl.rewards)
