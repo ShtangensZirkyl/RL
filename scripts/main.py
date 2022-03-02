@@ -56,6 +56,19 @@ class DeepRL(object):
         self.net.save(path)
 
 
+def remove_files():
+    if os.path.isdir('frames'):
+        os.chdir('frames')
+        print(os.listdir())
+        for folder in os.listdir():
+            os.chdir(str(folder))
+            for file in os.listdir():
+                os.remove(file)
+            os.chdir('..')
+            os.rmdir(folder)
+        os.chdir('..')
+
+
 def make_gif_animation(_path):
     os.chdir(_path)
     for dirs in os.listdir():
