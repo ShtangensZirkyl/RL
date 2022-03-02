@@ -46,7 +46,7 @@ class Environment:
         x_flag = 0
         y_flag = self.ship.v
         self.flag = Island(x_flag, y_flag, 1)
-        self.steps_limit = 1.4 / self.dt
+        self.steps_limit = 2 / self.dt
         self.target = Target(self.data['dist1'].values[self.index] * math.cos(math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
                              self.data['dist1'].values[self.index] * math.sin(math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
                              1, math.pi / 2 - math.radians(self.data['course1'].values[self.index]),
