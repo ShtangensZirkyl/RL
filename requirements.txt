@@ -1,17 +1,17 @@
-backcall @ file:///home/ktietz/src/ci/backcall_1611930011877/work
+backcall
 certifi==2021.10.8
-colorama @ file:///tmp/build/80754af9/colorama_1607707115595/work
+colorama
 cycler==0.11.0
-debugpy @ file:///C:/ci/debugpy_1637091961445/work
-decorator @ file:///opt/conda/conda-bld/decorator_1643638310831/work
+debugpy
+decorator
 entrypoints==0.3
 fonttools==4.29.1
-ipykernel @ file:///C:/ci/ipykernel_1633545585502/work/dist/ipykernel-6.4.1-py3-none-any.whl
-ipython @ file:///C:/ci/ipython_1643818352265/work
-ipython-genutils @ file:///tmp/build/80754af9/ipython_genutils_1606773439826/work
-jedi @ file:///C:/ci/jedi_1611341083684/work
-jupyter-client @ file:///opt/conda/conda-bld/jupyter_client_1643638337975/work
-jupyter-core @ file:///C:/ci/jupyter_core_1636537172022/work
+ipykernel
+ipython
+ipython-genutils
+jedi
+jupyter-client
+jupyter-core
 kiwisolver==1.3.2
 matplotlib==3.5.1
 matplotlib-inline

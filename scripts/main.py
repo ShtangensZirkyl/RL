@@ -1,6 +1,6 @@
 import os
 from environment import Environment
-from network import DQN, Net, Net4
+from network import DQN, Net, Net4, Net5
 import tqdm
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -80,7 +80,8 @@ def make_gif_animation(_path):
 
 if __name__ == '__main__':
     # Для Net4: 0.8986447222222222 решенных
-    drl = DeepRL(network=Net)
+    # Для Net2: 0.6945472222222222 решенных
+    drl = DeepRL(network=Net5)
     drl.train()
     fig, ax = plt.subplots(nrows=1, ncols=1)
     ax.plot(drl.rewards)
@@ -94,4 +95,4 @@ if __name__ == '__main__':
             p += 1
     print(m / (m + p))
     make_gif_animation('frames')
-    drl.save('../models/net4.json')
+    drl.save('../models/net5.json')
