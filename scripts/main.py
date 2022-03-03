@@ -98,7 +98,7 @@ if __name__ == '__main__':
     drl.train()
     fig, ax = plt.subplots(nrows=1, ncols=1)
     ax.plot(drl.rewards)
-    fig.savefig('rewards.png')  # save the figure to file
+    fig.savefig('rewards5.png')  # save the figure to file
     m = 0
     p = 0
     for i in drl.rewards:
