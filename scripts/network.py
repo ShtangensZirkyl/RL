@@ -14,6 +14,8 @@ MEMORY_CAPACITY = 10000
 NUM_ACTIONS = 3
 NUM_STATES = 4
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 class Net(nn.Module):
     def __init__(self):
@@ -96,6 +98,8 @@ class DQN:
         self.memory_counter = 0
         self.learn_counter = 0
         self.optimizer = optim.Adam(self.eval_net.parameters(), LR)
+        self.eval_net.to(device)
+        self.target_net.to(device)
         self.loss = nn.MSELoss()
 
     def store_trans(self, state, action, reward, next_state):
@@ -108,11 +112,10 @@ class DQN:
         self.eval_net.save(path)
 
     def choose_action(self, state):
-        state = torch.unsqueeze(torch.FloatTensor(state), 0)
+        state = torch.unsqueeze(torch.cuda.FloatTensor(state, device=device), 0)
         if np.random.randn() <= EPSILON:
             action_value = self.eval_net.forward(state)
-            action = torch.max(action_value, 1)[1].data.numpy()
-            action = action[0]
+            action = int(torch.max(action_value, 1)[1])
         else:
             action = np.random.randint(0, NUM_ACTIONS)
         return action
@@ -124,10 +127,11 @@ class DQN:
 
         sample_index = np.random.choice(MEMORY_CAPACITY, BATCH_SIZE)
         batch_memory = self.memory[sample_index, :]
-        batch_state = torch.FloatTensor(batch_memory[:, :NUM_STATES])
-        batch_action = torch.LongTensor(batch_memory[:, NUM_STATES:NUM_STATES + 1].astype(int))
-        batch_reward = torch.FloatTensor(batch_memory[:, NUM_STATES + 1: NUM_STATES + 2])
-        batch_next_state = torch.FloatTensor(batch_memory[:, -NUM_STATES:])
+        batch_state = torch.cuda.FloatTensor(batch_memory[:, :NUM_STATES], device=device)
+        # note that the action must be a int
+        batch_action = torch.cuda.LongTensor(batch_memory[:, NUM_STATES:NUM_STATES + 1].astype(int), device=device)
+        batch_reward = torch.cuda.FloatTensor(batch_memory[:, NUM_STATES + 1: NUM_STATES + 2], device=device)
+        batch_next_state = torch.cuda.FloatTensor(batch_memory[:, -NUM_STATES:], device=device)
 
         q_eval = self.eval_net(batch_state).gather(1, batch_action)
         q_next = self.target_net(batch_next_state).detach()

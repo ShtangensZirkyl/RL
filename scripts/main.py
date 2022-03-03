@@ -92,6 +92,7 @@ def make_gif_animation(_path):
 
 
 if __name__ == '__main__':
+    os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     # Для Net4: 0.8986447222222222 решенных
     # Для Net2: 0.6945472222222222 решенных
     drl = DeepRL(network=Net5)
