@@ -32,6 +32,7 @@ class Environment:
         self.index = -1
         self.data = pd.read_csv(path)
         self.data = self.data.drop(['Unnamed: 0'], axis=1)
+        self.data = self.data.sample(n=500000)
 
         self.build_environment()
 
