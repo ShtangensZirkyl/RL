@@ -15,7 +15,7 @@ class DeepRL(object):
         self.net = DQN(network)
         self.env = Environment()
         # self.episodes = len(self.env.data)
-        self.episodes = 500000
+        self.episodes = 1000000
         self.memory_capacity = mem
         self.rewards = []
 
@@ -96,7 +96,7 @@ if __name__ == '__main__':
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     # Для Net4: 0.8986447222222222 решенных
     # Для Net2: 0.6945472222222222 решенных
-    drl = DeepRL(network=Net4)
+    drl = DeepRL(network=Net)
     drl.train()
     fig, ax = plt.subplots(nrows=1, ncols=1)
     ax.plot(drl.rewards)
@@ -110,4 +110,4 @@ if __name__ == '__main__':
             p += 1
     print(m / (m + p))
     make_gif_animation('frames')
-    drl.save('../models/net4.json')
+    drl.save('../models/net.json')
