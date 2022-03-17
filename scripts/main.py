@@ -1,4 +1,7 @@
 import os
+
+import torch
+
 from environment import Environment
 from network import DQN, Net, Net4
 import tqdm
@@ -7,11 +10,11 @@ import matplotlib.pyplot as plt
 
 rewards = []
 EPISODES = 50000
-MEMORY_CAPACITY = 10000
+MEMORY_CAPACITY = 100000
 
 
 class DeepRL(object):
-    def __init__(self, network=Net, mem=MEMORY_CAPACITY):
+    def __init__(self, network=Net4, mem=MEMORY_CAPACITY):
         self.net = DQN(network)
         self.env = Environment()
         self.episodes = len(self.env.data)
@@ -59,7 +62,6 @@ class DeepRL(object):
 def remove_files():
     if os.path.isdir('frames'):
         os.chdir('frames')
-        print(os.listdir())
         for folder in os.listdir():
             os.chdir(str(folder))
             for file in os.listdir():
@@ -93,7 +95,8 @@ def make_gif_animation(_path):
 
 if __name__ == '__main__':
     # Для Net4: 0.8986447222222222 решенных
-    drl = DeepRL(network=Net)
+    remove_files()
+    drl = DeepRL(network=Net4)
     drl.train()
     fig, ax = plt.subplots(nrows=1, ncols=1)
     ax.plot(drl.rewards)
@@ -105,6 +108,8 @@ if __name__ == '__main__':
             m += 1
         else:
             p += 1
-    print(m / (m + p))
+    print(p / (m + p))
     make_gif_animation('frames')
-    drl.save('../models/net4.json')
+    if not os.path.isdir('../models'):
+        os.mkdir('../models')
+    drl.save('../models/Net4.json')

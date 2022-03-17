@@ -18,7 +18,7 @@ class Environment:
     def __init__(self, path='../data/tests.csv'):
         self.action_space = ['left', 'right', 'idle']
         self.n_actions = len(self.action_space)
-        self.n_features = 4
+        self.n_features = 7
 
         self.prev_dist = 0
         self.prev_i_dist = 0
@@ -32,6 +32,7 @@ class Environment:
         self.index = -1
         self.data = pd.read_csv(path)
         self.data = self.data.drop(['Unnamed: 0'], axis=1)
+        self.data = self.data.sample(n=100000)
 
         self.build_environment()
 
@@ -46,7 +47,7 @@ class Environment:
         x_flag = 0
         y_flag = self.ship.v
         self.flag = Island(x_flag, y_flag, 1)
-        self.steps_limit = 1.4 / self.dt
+        self.steps_limit = 2.5 / self.dt
         self.target = Target(self.data['dist1'].values[self.index] * math.cos(math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
                              self.data['dist1'].values[self.index] * math.sin(math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
                              1, math.pi / 2 - math.radians(self.data['course1'].values[self.index]),
@@ -67,22 +68,30 @@ class Environment:
         dxf, dyf = c[0] - a[0], c[1] - a[1]
         f_angle = math.atan2(dyf, dxf)
         i_angle = math.atan2(dyi, dxi)
-        return [f_angle - self.ship.direction, self.target.get_dist(a[0], a[1]), i_angle - self.ship.direction,
+        return [a[0], a[1], self.ship.direction,
+                c[0], c[1],
+                # f_angle - self.ship.direction,
+                self.target.get_dist(a[0], a[1]),
+                # i_angle - self.ship.direction,
                 self.flag.get_dist(a[0], a[1])]
 
     def reset(self):
         self.build_environment()
         return self.get_state()
 
+    def angle_to_destination(self):
+        x, y = self.ship.x - self.flag.xcentr, self.ship.y - self.flag.ycentr
+        return abs(math.atan2(y, x))
+
     def step(self, action):
         angle_change_reward = 0
 
-        if action == 0:
+        if action == 0:             # turn left
             self.ship.direction += math.pi / 12
-            angle_change_reward = 10
-        elif action == 1:
+            angle_change_reward = 2
+        elif action == 1:           # turn right
             self.ship.direction -= math.pi / 12
-            angle_change_reward = 10
+            angle_change_reward = 1
 
         self.ship.move(self.dt)
         self.target.move(self.dt)
@@ -92,22 +101,28 @@ class Environment:
         next_state = self.get_state()
 
         if self.flag.belongs_to_boarder(self.ship.x, self.ship.y):
-            reward = 20000
-            reward += (self.steps_limit - len(self.ship.get_positions())) * 100
+            reward = 500
+            # reward += (self.steps_limit - len(self.ship.get_positions())) * 100
             done = True
 
         elif self.target.belongs_to_boarder(self.ship.x, self.ship.y):
-            reward = -10000
+            reward = -200
             done = True
 
         elif len(self.ship.get_positions()) > self.steps_limit:
             done = True
-            reward = -1000 * (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 2
-            reward -= 8000
+            # reward = -100 * (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 2
+            reward = -150
         else:
-            reward = (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 3
-            # reward -= 0.1 * (self.prev_i_dist - self.island.get_dist(self.ship.x, self.ship.y)) ** 3
-            reward -= angle_change_reward
+            # coefficient = 1000 better
+            # reward = 10 * (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 3
+            # reward = -10 * (self.flag.get_dist(self.ship.x, self.ship.y)) ** 3
+            # print("Reward for dist " + str(reward))
+            # coefficient = 1 better
+            # reward = self.angle_to_destination()*0.1
+            # print("Reward for ang " + str(reward))
+            reward = -angle_change_reward
+            # print("Reward for ang change " + str(reward))
             done = False
 
         self.prev_dist = self.flag.get_dist(self.ship.x, self.ship.y)
