@@ -15,7 +15,7 @@ class DeepRL(object):
         self.net = DQN(network)
         self.env = Environment()
         # self.episodes = len(self.env.data)
-        self.episodes = 1000000
+        self.episodes = 1200000
         self.memory_capacity = mem
         self.rewards = []
 
