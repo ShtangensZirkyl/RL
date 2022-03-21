@@ -68,11 +68,11 @@ class Environment:
         dxf, dyf = c[0] - a[0], c[1] - a[1]
         f_angle = math.atan2(dyf, dxf)
         i_angle = math.atan2(dyi, dxi)
-        return [a[0], a[1], self.ship.direction,
+        return [a[0], a[1],
                 c[0], c[1],
-                # f_angle - self.ship.direction,
+                f_angle - self.ship.direction,
                 self.target.get_dist(a[0], a[1]),
-                # i_angle - self.ship.direction,
+                i_angle - self.ship.direction,
                 self.flag.get_dist(a[0], a[1])]
 
     def reset(self):
@@ -88,10 +88,10 @@ class Environment:
 
         if action == 0:             # turn left
             self.ship.direction += math.pi / 12
-            angle_change_reward = 2
+            angle_change_reward = 10
         elif action == 1:           # turn right
             self.ship.direction -= math.pi / 12
-            angle_change_reward = 1
+            angle_change_reward = 5
 
         self.ship.move(self.dt)
         self.target.move(self.dt)
@@ -106,13 +106,13 @@ class Environment:
             done = True
 
         elif self.target.belongs_to_boarder(self.ship.x, self.ship.y):
-            reward = -200
+            reward = -1000
             done = True
 
         elif len(self.ship.get_positions()) > self.steps_limit:
             done = True
             # reward = -100 * (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 2
-            reward = -150
+            reward = -750
         else:
             # coefficient = 1000 better
             # reward = 10 * (self.prev_dist - self.flag.get_dist(self.ship.x, self.ship.y)) ** 3

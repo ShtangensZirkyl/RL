@@ -100,5 +100,8 @@ if __name__ == '__main__':
         else:
             p += 1
     print(p / (m + p))
+    fig, ax = plt.subplots(nrows=1, ncols=1)
+    ax.plot(test_mod.rewards)
+    fig.savefig('test_rewards.png')  # save the figure to file
     make_gif_animation('test_frames')
-    print(test_mod.rewards)
+    # print(test_mod.rewards)

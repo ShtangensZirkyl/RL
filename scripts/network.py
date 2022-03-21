@@ -9,10 +9,10 @@ LR = 0.02
 GAMMA = 0.90
 EPSILON = 0.9
 Q_NETWORK_ITERATION = 1000
-MEMORY_CAPACITY = 10000
+MEMORY_CAPACITY = 100000
 
 NUM_ACTIONS = 3
-NUM_STATES = 7
+NUM_STATES = 8
 
 
 class Net(nn.Module):
@@ -33,13 +33,13 @@ class Net(nn.Module):
 class Net4(nn.Module):
     def __init__(self):
         super(Net4, self).__init__()
-        self.fc1 = nn.Linear(NUM_STATES, 90)
+        self.fc1 = nn.Linear(NUM_STATES, 120)
         self.fc1.weight.data.normal_(0, 0.1)
-        self.fc2 = nn.Linear(90, 180)
+        self.fc2 = nn.Linear(120, 240)
         self.fc2.weight.data.normal_(0, 0.1)
-        self.fc3 = nn.Linear(180, 90)
+        self.fc3 = nn.Linear(240, 120)
         self.fc3.weight.data.normal_(0, 0.1)
-        self.fc4 = nn.Linear(90, NUM_ACTIONS)
+        self.fc4 = nn.Linear(120, NUM_ACTIONS)
         self.fc4.weight.data.normal_(0, 0.1)
 
     def forward(self, x):
