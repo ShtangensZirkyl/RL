@@ -1,9 +1,11 @@
 import os
-from environment import Environment
-from network import DQN, Net, Net4, Net5
+
+import matplotlib.pyplot as plt
 import tqdm
 from PIL import Image
-import matplotlib.pyplot as plt
+
+from environment import Environment
+from network import DQN, Net
 
 rewards = []
 EPISODES = 50000
@@ -14,7 +16,8 @@ class DeepRL(object):
     def __init__(self, network=Net, mem=MEMORY_CAPACITY):
         self.net = DQN(network)
         self.env = Environment()
-        self.episodes = len(self.env.data)
+        # self.episodes = len(self.env.data)
+        self.episodes = 20000
         self.memory_capacity = mem
         self.rewards = []
 
@@ -95,7 +98,7 @@ if __name__ == '__main__':
     os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
     # Для Net4: 0.8986447222222222 решенных
     # Для Net2: 0.6945472222222222 решенных
-    drl = DeepRL(network=Net5)
+    drl = DeepRL(network=Net)
     drl.train()
     fig, ax = plt.subplots(nrows=1, ncols=1)
     ax.plot(drl.rewards)
@@ -107,6 +110,6 @@ if __name__ == '__main__':
             m += 1
         else:
             p += 1
-    print(m / (m + p))
+    print(p / (m + p))
     make_gif_animation('frames')
-    drl.save('../models/net5.json')
+    drl.save('../models/net.json')

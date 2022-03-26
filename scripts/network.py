@@ -1,8 +1,8 @@
+import numpy as np
 import torch
-from torch import optim
 import torch.nn as nn
 import torch.nn.functional as F
-import numpy as np
+from torch import optim
 
 BATCH_SIZE = 100
 LR = 0.02
@@ -11,7 +11,7 @@ EPSILON = 0.9
 Q_NETWORK_ITERATION = 1000
 MEMORY_CAPACITY = 10000
 
-NUM_ACTIONS = 3
+NUM_ACTIONS = 5
 NUM_STATES = 4
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -97,10 +97,10 @@ class DQN:
         self.memory = np.zeros((MEMORY_CAPACITY, NUM_STATES * 2 + 2))
         self.memory_counter = 0
         self.learn_counter = 0
-        self.optimizer = optim.Adam(self.eval_net.parameters(), LR)
+        self.optimizer = optim.RMSprop(self.eval_net.parameters())
         self.eval_net.to(device)
         self.target_net.to(device)
-        self.loss = nn.MSELoss()
+        self.loss = nn.SmoothL1Loss()
 
     def store_trans(self, state, action, reward, next_state):
         index = self.memory_counter % MEMORY_CAPACITY
@@ -138,6 +138,7 @@ class DQN:
         q_target = batch_reward + GAMMA * q_next.max(1)[0].view(BATCH_SIZE, 1)
 
         loss = self.loss(q_eval, q_target)
-        self.optimizer.zero_grad()
+
+        self.optimizer.zero_grad(set_to_none=True)
         loss.backward()
         self.optimizer.step()
