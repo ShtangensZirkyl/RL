@@ -11,7 +11,7 @@ EPSILON = 0.9
 Q_NETWORK_ITERATION = 1000
 MEMORY_CAPACITY = 10000
 
-NUM_ACTIONS = 3
+NUM_ACTIONS = 5
 NUM_STATES = 4
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")

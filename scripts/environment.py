@@ -1,4 +1,5 @@
 import math
+import random
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -12,11 +13,12 @@ X_UPPER_BOUND = 10
 Y_LOWER_BOUND = 0
 Y_UPPER_BOUND = 10
 STEPS_LIMIT = 25
+USE_SYNTHETICS = True
 
 
 class Environment:
     def __init__(self, path='../data/tests.csv'):
-        self.action_space = ['left', 'right', 'idle']
+        self.action_space = ['left', 'right', 'idle', 'speed_low', 'speed_high']
         self.n_actions = len(self.action_space)
         self.n_features = 4
 
@@ -26,40 +28,43 @@ class Environment:
         self.flag = None
         self.ship = None
         self.target = None
-        self.dt = 0.1
+        self.dt = 0.8
         self.steps_limit = 100
 
         self.index = -1
-        self.data = pd.read_csv(path)
-        self.data = self.data.drop(['Unnamed: 0'], axis=1)
-        self.data = self.data.sample(n=100000)
+        if not USE_SYNTHETICS:
+            self.data = pd.read_csv(path)
+            self.data = self.data.drop(['Unnamed: 0'], axis=1)
+            self.data = self.data.sample(n=100000)
 
         self.build_environment()
 
     def build_environment(self):
         self.index += 1
-        # rate = random.uniform(0.4, 0.6)
-        # dist = random.uniform(5, 15)
-        # angle = random.uniform(0, 2 * math.pi)
-        if self.index == len(self.data):
-            self.index = 0
-        self.ship = Ship(0, 0, self.data['speed'].values[self.index])
-        # self.ship = Ship(0, 0, 1)
         x_flag = 0
-        y_flag = self.ship.v
-        # y_flag = 10
+        if USE_SYNTHETICS:
+            rate = random.uniform(0.4, 0.6)
+            dist = random.uniform(5, 15)
+            angle = random.uniform(0, 2 * math.pi)
+            self.ship = Ship(0, 0, 1)
+            self.target = Target(rate * dist * (math.cos(angle)),
+                                 rate * dist * (1 + math.sin(angle)),
+                                 1, angle - math.pi,
+                                 1)
+            y_flag = 15
+        else:
+            if self.index == len(self.data):
+                self.index = 0
+            self.ship = Ship(0, 0, self.data['speed'].values[self.index])
+            y_flag = self.ship.v
+            self.target = Target(self.data['dist1'].values[self.index] * math.cos(
+                math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
+                                 self.data['dist1'].values[self.index] * math.sin(
+                                     math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
+                                 1, math.pi / 2 - math.radians(self.data['course1'].values[self.index]),
+                                 self.data['speed1'].values[self.index])
         self.flag = Island(x_flag, y_flag, 1)
-        self.steps_limit = 1.3 * y_flag / self.ship.v / self.dt
-        self.target = Target(self.data['dist1'].values[self.index] * math.cos(
-            math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
-                             self.data['dist1'].values[self.index] * math.sin(
-                                 math.pi / 2 - math.radians(self.data['peleng1'].values[self.index])),
-                             1, math.pi / 2 - math.radians(self.data['course1'].values[self.index]),
-                             self.data['speed1'].values[self.index])
-        # self.target = Target(rate * dist * (1 + math.cos(angle)),
-        #                      rate * dist * (1 + math.sin(angle)),
-        #                      1, angle - math.pi,
-        #                      1)
+        self.steps_limit = 1 * y_flag / self.ship.v / self.dt
         a = self.ship.getCoords()
         b = self.flag.getCoords()
         dxf, dyf = b[0] - a[0], b[1] - a[1]
@@ -88,10 +93,14 @@ class Environment:
 
         if action == 0:
             self.ship.direction += math.pi / 12
-            angle_change_reward = 30
+            angle_change_reward = 10
         elif action == 1:
             self.ship.direction -= math.pi / 12
-            angle_change_reward = 10
+            angle_change_reward = 40
+        elif action == 3 and self.ship.v > 0.4:
+            self.ship.v -= 0.2
+        elif action == 4 and self.ship.v < 1.4:
+            self.ship.v += 0.2
 
         self.ship.move(self.dt)
         self.target.move(self.dt)
