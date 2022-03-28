@@ -64,7 +64,7 @@ class Environment:
                                  1, math.pi / 2 - math.radians(self.data['course1'].values[self.index]),
                                  self.data['speed1'].values[self.index])
         self.flag = Island(x_flag, y_flag, 1)
-        self.steps_limit = 1 * y_flag / self.ship.v / self.dt
+        self.steps_limit = 1.5 * y_flag / self.ship.v / self.dt
         a = self.ship.getCoords()
         b = self.flag.getCoords()
         dxf, dyf = b[0] - a[0], b[1] - a[1]
